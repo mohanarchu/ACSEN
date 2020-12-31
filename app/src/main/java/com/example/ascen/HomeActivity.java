@@ -1,5 +1,6 @@
 package com.example.ascen;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,6 +13,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,6 +27,12 @@ import com.example.ascen.databinding.ActivityHomeBinding;
 import com.example.ascen.modal.IptListModal;
 import com.example.ascen.presenter.IptListPresenter;
 import com.example.ascen.session.SessionLogin;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
@@ -48,6 +56,7 @@ public class HomeActivity extends AppCompatActivity implements IptListPresenter.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityHomeBinding.inflate(getLayoutInflater());
+        FirebaseApp.initializeApp(this);
         setContentView(binding.getRoot());
         binding.btnCreateIpt.setOnClickListener(v -> {
            Intent intent = new Intent(getApplicationContext(),CreateIptActivity.class);
@@ -66,11 +75,26 @@ public class HomeActivity extends AppCompatActivity implements IptListPresenter.
         });
         if (SessionLogin.getUser().getResult()[0].getDcode().equals("TM")) {
             binding.btnCreateIpt.setVisibility(View.VISIBLE);
-        } else{
+        } else {
             binding.btnCreateIpt.setVisibility(View.GONE);
         }
+        fetchFCMToken();
     }
-
+    private void fetchFCMToken() {
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(new OnCompleteListener<String>() {
+                    @Override
+                    public void onComplete(@NonNull Task<String> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w("TAG", "Fetching FCM registration token failed", task.getException());
+                            return;
+                        }
+                        // Get new FCM registration token
+                        String token = task.getResult();
+                        Log.d("TAG", "Fetching FCM registration "+token);
+                    }
+                });
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

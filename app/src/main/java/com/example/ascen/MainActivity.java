@@ -68,7 +68,6 @@ public class MainActivity extends AppCompatActivity implements LoginPresenter.Lo
                 binding.password.setTransformationMethod(new PasswordTransformationMethod());
             }
         });
-
     }
 
 

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "606101826798",
+    "project_id": "ascen-7b697",
+    "storage_bucket": "ascen-7b697.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:606101826798:android:edd577560936f381cc97ff",
+        "android_client_info": {
+          "package_name": "com.example.ascen"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "606101826798-rg8bk9d4hk5727048rja2boot7kfknap.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.ascen",
+            "certificate_hash": "0fcfb9a081cdd683d3705001862e9f665bf15f4a"
+          }
+        },
+        {
+          "client_id": "606101826798-ta4j1k8qafo16dg2117os3lnir2vha3r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBf08FvkeuJQf7n2YpuaLA0AtmEfzSRQdE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "606101826798-ta4j1k8qafo16dg2117os3lnir2vha3r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

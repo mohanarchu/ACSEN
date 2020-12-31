@@ -3,6 +3,8 @@ package com.example.ascen;
 import android.app.Application;
 import android.content.Context;
 
+import com.google.firebase.FirebaseApp;
+
 public class MainApplication extends Application {
 
     private static MainApplication mInstance;
@@ -21,5 +23,6 @@ public class MainApplication extends Application {
     public void onCreate() {
         super.onCreate();
         mInstance = this;
+        FirebaseApp.initializeApp(this);
     }
 }
