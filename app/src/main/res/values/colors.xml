@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3399ff</color>
+    <color name="colorPrimaryDark">#3399ff</color>
+    <color name="colorAccent">#03DAC5</color>
+
+    <color name="grey">#FFFFFF</color>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="purple_300">#536AFF</color>
+    <color name="teal_200">#56C0E6</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFF</color>
+
+    <color name="google_sign_in">#E85A42</color>
+
+    <color name="divider">#E9E9E9</color>
+
+    <color name="smoke">#F5F5F5</color>
+    <color name="line">#EAEAEA</color>
+    <color name="light_red">#E3CEC9</color>
+    <color name="text_color">#7A7A7A</color>
+
+    <color name="terms_conditions">#333333</color>
+    <color name="blue">#56C0E6</color>
+    <color name="green">#228B22</color>
+    <color name="red">#FF0000</color>
+
+</resources>
