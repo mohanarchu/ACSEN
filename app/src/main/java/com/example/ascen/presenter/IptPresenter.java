@@ -35,9 +35,8 @@ public class IptPresenter {
                     }
                     @Override
                     public void onNext(CustomerModal responseBody) {
-
                         if (responseBody.getStatus().endsWith("true") ){
-                            iplView.showCustomer(responseBody.getResponse());
+                            iplView.showCustomer(responseBody);
                         } else {
                             iplView.showError("Error in  fetching customer");
                         }
@@ -101,7 +100,7 @@ public class IptPresenter {
                     public void onNext(StateModal responseBody) {
 
                         if (responseBody.getStatus().endsWith("true") ){
-                            iplView.showState(responseBody.getResponse());
+                            iplView.showState(responseBody);
                         } else {
                             iplView.showError("Error in  fetching customer");
                         }
@@ -186,9 +185,9 @@ public class IptPresenter {
         void showProgress();
         void hideProgress();
         void showError(String message);
-        void showCustomer(CustomerModal.Response[] response);
+        void showCustomer(CustomerModal response);
         void showCustomerInv(CustomerInvModal.Response[] response);
-        void showState(StateModal.Response[] response);
+        void showState(StateModal response);
         void showToCustomer(ToCustomerModal.Response[] response);
         void iptCreatedSucess();
     }

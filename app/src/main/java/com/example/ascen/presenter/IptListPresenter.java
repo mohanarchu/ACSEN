@@ -59,7 +59,6 @@ public class IptListPresenter {
                     }
                     @Override
                     public void onNext(IptUpdatePojo responseBody) {
-
                         if (responseBody.getStatus().endsWith("true") ){
                             iptListView.updateSuccess();
                             iptListView.showError(responseBody.getMessage());

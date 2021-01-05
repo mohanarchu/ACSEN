@@ -12,7 +12,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,7 +27,9 @@ import android.widget.Toast;
 import com.example.ascen.adapter.AddressAdapter;
 import com.example.ascen.databinding.ActivityHomeBinding;
 import com.example.ascen.modal.IptListModal;
+import com.example.ascen.modal.LoginModal;
 import com.example.ascen.presenter.IptListPresenter;
+import com.example.ascen.presenter.LoginPresenter;
 import com.example.ascen.session.SessionLogin;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -43,7 +47,7 @@ import java.util.stream.Collectors;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class HomeActivity extends AppCompatActivity implements IptListPresenter.IptListView {
+public class HomeActivity extends AppCompatActivity implements IptListPresenter.IptListView, LoginPresenter.LoginView {
 
 
 
@@ -51,6 +55,7 @@ public class HomeActivity extends AppCompatActivity implements IptListPresenter.
     IptListPresenter iptListPresenter;
     AddressAdapter iptAdapter = new AddressAdapter();
     List<IptListModal.Response> arrays;
+    LoginPresenter loginPresenter;
     List<IptListModal.Response> iptUpdateList= new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,36 +68,47 @@ public class HomeActivity extends AppCompatActivity implements IptListPresenter.
            startActivityForResult(intent,100);
        });
         iptListPresenter = new IptListPresenter(this);
+        loginPresenter = new LoginPresenter(this,getApplicationContext());
         iptListPresenter.getList();
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL,false);
         binding.iptRecycler.setLayoutManager(linearLayoutManager);
         binding.iptRecycler.setAdapter(iptAdapter);
-        binding.showFilter.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showAlertDialogButtonClicked();
-            }
-        });
-        if (SessionLogin.getUser().getResult()[0].getDcode().equals("TM")) {
+        binding.showFilter.setOnClickListener(v -> showAlertDialogButtonClicked());
+        binding.showFilterText.setOnClickListener(v -> showAlertDialogButtonClicked());
+        binding.empName.setText(SessionLogin.getUser().getResult()[0].getEmpName());
+        if (SessionLogin.getUser().getResult()[0].getDcode().equals("TM") || !SessionLogin.getUser().getResult()[0].getActing().equals("Single")) {
             binding.btnCreateIpt.setVisibility(View.VISIBLE);
         } else {
             binding.btnCreateIpt.setVisibility(View.GONE);
         }
-        fetchFCMToken();
+        if (SessionLogin.getIsFirstTime()) {
+             fetchFCMToken();
+        }
     }
+
+
     private void fetchFCMToken() {
-        FirebaseMessaging.getInstance().getToken()
-                .addOnCompleteListener(new OnCompleteListener<String>() {
-                    @Override
-                    public void onComplete(@NonNull Task<String> task) {
-                        if (!task.isSuccessful()) {
-                            Log.w("TAG", "Fetching FCM registration token failed", task.getException());
-                            return;
-                        }
-                        // Get new FCM registration token
-                        String token = task.getResult();
-                        Log.d("TAG", "Fetching FCM registration "+token);
+                FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.w("TAG", "Fetching FCM registration token failed", task.getException());
+                        return;
                     }
+
+                    String token = task.getResult();
+                    Log.i("TAG","Toen to Send"+token);
+                    // Get new FCM registration token
+
+                    String deviceId = Settings.Secure.getString(getApplicationContext().getContentResolver(),Settings.Secure.ANDROID_ID);
+                    JsonObject jsonObject = new JsonObject();
+                    jsonObject.addProperty("EmpCode", SessionLogin.getUser().getResult()[0].getEmpCode());
+                    jsonObject.addProperty("Acting",SessionLogin.getUser().getResult()[0].getActing());
+                    jsonObject.addProperty("Dcode",SessionLogin.getUser().getResult()[0].getDcode());
+                    jsonObject.addProperty("DeviceId",deviceId);
+                    jsonObject.addProperty("Token",token);
+                    jsonObject.addProperty("dataAreaId","hof");
+                    SessionLogin.saveFirstTime(false);
+                    loginPresenter.updateDeviceId(jsonObject,SessionLogin.getUser().getResult()[0].getEmpCode(),token);
                 });
     }
     @Override
@@ -111,6 +127,7 @@ public class HomeActivity extends AppCompatActivity implements IptListPresenter.
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     SessionLogin.clearLoginSession();
+                    SessionLogin.saveFirstTime(true);
                     startActivity(new Intent(getApplicationContext(),MainActivity.class));
                     finish();
                 }
@@ -167,9 +184,14 @@ public class HomeActivity extends AppCompatActivity implements IptListPresenter.
     }
 
     void filter(String type,String name) {
-        binding.showFilter.setText(name);
-        List<IptListModal.Response> array;
-        array = arrays.stream().filter(e -> e.getIPTSTATUS().toLowerCase().equals(name.toLowerCase().trim())).collect(Collectors.toList());
+        binding.showFilterText.setText(name);
+        List<IptListModal.Response> array = new ArrayList<>();
+        array.clear();
+        for (int i = 0; i < arrays.size(); i++) {
+            if (arrays.get(i).getIPTSTATUS().toLowerCase().equals(name.toLowerCase().trim())) {
+                array.add(arrays.get(i));
+            }
+        }
         if (name.equals("All")) {
             setData(arrays);
         } else {
@@ -199,6 +221,16 @@ public class HomeActivity extends AppCompatActivity implements IptListPresenter.
     @Override
     public void showError(String message) {
         Toast.makeText(getApplicationContext(),message,Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void showMistmatchError(LoginModal loginModal, String deviceId) {
+
+    }
+
+    @Override
+    public void showResult(LoginModal loginModal) {
+
     }
 
     void setData(  List<IptListModal.Response> arrays) {

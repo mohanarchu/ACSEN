@@ -2,9 +2,15 @@ package com.example.ascen.presenter;
 
 import android.content.Context;
 import android.provider.Settings;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.example.ascen.modal.LoginModal;
 import com.example.ascen.network.UserRepository;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.JsonObject;
 
 import io.reactivex.Observer;
@@ -23,7 +29,7 @@ public class LoginPresenter {
         this.context = context;
     }
 
-    public void doLogin(String emiId) {
+    public void doLogin(String emiId,String token) {
         userView.showProgress();
         UserRepository.doLogin(emiId).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<LoginModal>() {
@@ -41,14 +47,15 @@ public class LoginPresenter {
                         jsonObject.addProperty("Acting",responseBody.getResult()[0].getActing());
                         jsonObject.addProperty("Dcode",responseBody.getResult()[0].getDcode());
                         jsonObject.addProperty("DeviceId",deviceId);
-                        jsonObject.addProperty("Token","f_Q1E-BZf8A:APA91bHCf6JSPHtB8QKk9O1mKc5Y8HZr_-Ade5DbVVczojvdDLQcegaSPnTdAfg7dYf7-edWbtRoVlbnAusvjPN7IWcFr8DlNDGFmk-61N_FR2oXmOQ_Oz9lNFxBrz07_QwDEcRWSsA");
+                        jsonObject.addProperty("Token",token);
                         jsonObject.addProperty("dataAreaId","hof");
-                        updateDeviceId(jsonObject,responseBody.getResult()[0].getEmpCode());
+                        updateDeviceId(jsonObject,responseBody.getResult()[0].getEmpCode(),token);
                     } else {
-                        if (deviceId.equals(responseBody.getResult()[0].getDeviceId()))
-                             userView.showResult(responseBody);
-                        else
+                        if (deviceId.equals(responseBody.getResult()[0].getDeviceId())) {
+                            userView.showResult(responseBody);
+                        }   else {
                             userView.showMistmatchError(responseBody,deviceId);
+                        }
                     }
 
                 } else {
@@ -67,7 +74,7 @@ public class LoginPresenter {
             }
         });
     }
-    public void updateDeviceId(JsonObject jsonObject,String empId) {
+    public void updateDeviceId(JsonObject jsonObject,String empId,String token) {
         userView.showProgress();
         UserRepository.updateDeviceId(jsonObject).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<Response<ResponseBody>>() {
@@ -78,7 +85,7 @@ public class LoginPresenter {
                     @Override
                     public void onNext(Response<ResponseBody> responseBody) {
                         if (responseBody.code() == 200){
-                            doLogin(empId);
+                            doLogin(empId,token);
                             userView.hideProgress();
                         }
                     }

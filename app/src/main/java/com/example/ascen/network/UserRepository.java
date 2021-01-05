@@ -68,7 +68,7 @@ public class UserRepository {
         jsonObject.addProperty("EmpCode", SessionLogin.getUser().getResult()[0].getEmpCode());
         jsonObject.addProperty("Dcode", SessionLogin.getUser().getResult()[0].getDcode());
         jsonObject.addProperty("dataAreaId","hof");
-        jsonObject.addProperty("STATUS","Approved");
+        jsonObject.addProperty("STATUS","Pending");
         return ApiClient.getInstance().getApi(MainInterface.class)
                 .getIptList(jsonObject)
                 .observeOn(AndroidSchedulers.mainThread());

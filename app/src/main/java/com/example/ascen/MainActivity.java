@@ -1,5 +1,6 @@
 package com.example.ascen;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
@@ -8,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.method.PasswordTransformationMethod;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.CompoundButton;
@@ -18,6 +20,9 @@ import com.example.ascen.databinding.ActivityMainBinding;
 import com.example.ascen.modal.LoginModal;
 import com.example.ascen.presenter.LoginPresenter;
 import com.example.ascen.session.SessionLogin;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.JsonObject;
 
 import butterknife.ButterKnife;
@@ -53,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements LoginPresenter.Lo
                     showError("Please enter password");
                     return;
                 }
-                loginPresenter.doLogin(binding.userId.getText().toString());
+                loginPresenter.doLogin(binding.userId.getText().toString(),fetchFCMToken());
             }
         });
         if (SessionLogin.getLoginSession()) {
@@ -68,6 +73,22 @@ public class MainActivity extends AppCompatActivity implements LoginPresenter.Lo
                 binding.password.setTransformationMethod(new PasswordTransformationMethod());
             }
         });
+    }
+    private String fetchFCMToken() {
+        final String[] token = {""};
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(new OnCompleteListener<String>() {
+                    @Override
+                    public void onComplete(@NonNull Task<String> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w("TAG", "Fetching FCM registration token failed", task.getException());
+                            return;
+                        }
+                        // Get new FCM registration token
+                          token[0] = task.getResult();
+                    }
+                });
+        return token[0];
     }
 
 
@@ -102,9 +123,9 @@ public class MainActivity extends AppCompatActivity implements LoginPresenter.Lo
                 jsonObject.addProperty("Acting",loginModal.getResult()[0].getActing());
                 jsonObject.addProperty("Dcode",loginModal.getResult()[0].getDcode());
                 jsonObject.addProperty("DeviceId",deviceId);
-                jsonObject.addProperty("Token","f_Q1E-BZf8A:APA91bHCf6JSPHtB8QKk9O1mKc5Y8HZr_-Ade5DbVVczojvdDLQcegaSPnTdAfg7dYf7-edWbtRoVlbnAusvjPN7IWcFr8DlNDGFmk-61N_FR2oXmOQ_Oz9lNFxBrz07_QwDEcRWSsA");
+                jsonObject.addProperty("Token",fetchFCMToken());
                 jsonObject.addProperty("dataAreaId","hof");
-                loginPresenter.updateDeviceId(jsonObject,loginModal.getResult()[0].getEmpCode());
+                loginPresenter.updateDeviceId(jsonObject,loginModal.getResult()[0].getEmpCode(),fetchFCMToken());
             }
         });
         builder.setNegativeButton("No", new DialogInterface.OnClickListener() {

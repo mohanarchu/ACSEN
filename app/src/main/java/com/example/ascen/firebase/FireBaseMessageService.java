@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -17,22 +18,39 @@ import androidx.core.app.NotificationCompat;
 
 import com.example.ascen.MainActivity;
 import com.example.ascen.R;
+import com.example.ascen.modal.LoginModal;
+import com.example.ascen.presenter.LoginPresenter;
+import com.example.ascen.session.SessionLogin;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.google.gson.JsonObject;
 
 import java.util.Map;
 
-public class FireBaseMessageService extends FirebaseMessagingService {
+public class FireBaseMessageService extends FirebaseMessagingService implements LoginPresenter.LoginView {
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         Bundle  extras = new Bundle();  
         showNotification(remoteMessage.getNotification().getTitle(),remoteMessage.getNotification().getBody());
+
         super.onMessageReceived(remoteMessage);
     }
 
     @Override
     public void onNewToken(@NonNull String s) {
+        String deviceId = Settings.Secure.getString(getApplicationContext().getContentResolver(),Settings.Secure.ANDROID_ID);
+        LoginPresenter loginPresenter = new LoginPresenter(this,getApplicationContext());
+        if (SessionLogin.getLoginSession()) {
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("EmpCode", SessionLogin.getUser().getResult()[0].getEmpCode());
+            jsonObject.addProperty("Acting",SessionLogin.getUser().getResult()[0].getActing());
+            jsonObject.addProperty("Dcode",SessionLogin.getUser().getResult()[0].getDcode());
+            jsonObject.addProperty("DeviceId",deviceId);
+            jsonObject.addProperty("Token",s);
+            jsonObject.addProperty("dataAreaId","hof");
+            loginPresenter.updateDeviceId(jsonObject,SessionLogin.getUser().getResult()[0].getEmpCode(),s);
+        }
         super.onNewToken(s);
     }
 
@@ -42,7 +60,7 @@ public class FireBaseMessageService extends FirebaseMessagingService {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
         String channelId = "Default";
         NotificationCompat.Builder builder = new  NotificationCompat.Builder(this, channelId)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.notification_icon)
                 .setContentTitle(message)
                 .setContentText(title).setAutoCancel(true).setContentIntent(pendingIntent);;
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -61,5 +79,30 @@ public class FireBaseMessageService extends FirebaseMessagingService {
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.createNotificationChannel(chan);
         return channelId;
+    }
+
+    @Override
+    public void showProgress() {
+
+    }
+
+    @Override
+    public void hideProgress() {
+
+    }
+
+    @Override
+    public void showError(String message) {
+
+    }
+
+    @Override
+    public void showMistmatchError(LoginModal loginModal, String deviceId) {
+
+    }
+
+    @Override
+    public void showResult(LoginModal loginModal) {
+
     }
 }

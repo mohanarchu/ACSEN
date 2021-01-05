@@ -39,11 +39,22 @@ public class SessionLogin {
     public static void saveFirstTime(boolean value) {
         pref2.edit().putBoolean("isFirstTime", value).apply();
     }
-
     // Get if user opened the app first time
     public static boolean getIsFirstTime() {
-        return pref2.getBoolean("isFirstTime", false);
+        return pref2.getBoolean("isFirstTime", true);
     }
+
+
+
+    public static void saveIptDeatils(String details,String ref) {
+        pref2.edit().putString(ref, details).apply();
+    }
+
+    public static String getItpDetails(String ref) {
+       return   pref2.getString(ref, "");
+    }
+
+
     public static void saveToken(String token) {
         pref2.edit().putString("token", token).apply();
     }
