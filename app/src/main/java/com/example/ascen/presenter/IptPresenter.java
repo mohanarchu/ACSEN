@@ -3,6 +3,7 @@ package com.example.ascen.presenter;
 import com.example.ascen.modal.CustomerModal;
 import com.example.ascen.modal.ItpSuccessPojo;
 import com.example.ascen.modal.LoginModal;
+import com.example.ascen.modal.ReqNumberPojo;
 import com.example.ascen.modal.StateModal;
 import com.example.ascen.modal.ToCustomerModal;
 import com.example.ascen.network.UserRepository;
@@ -178,6 +179,38 @@ public class IptPresenter {
                     }
                 });
     }
+    public void getRequestNumber(JsonObject jsonObject) {
+        iplView.showProgress();
+        UserRepository.getReqNumber(jsonObject).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<ReqNumberPojo>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+                    @Override
+                    public void onNext(ReqNumberPojo responseBody) {
+
+                        if (responseBody.getStatus().equals("true") ){
+                            if (responseBody.getResponse() != null)
+                            iplView.showRequestCode(responseBody.getResponse()[0].getNUMBERSEQUENCE());
+                            else
+                                iplView.showRequestCode("0");
+                        } else {
+                            iplView.showError("Error in  creating IPT");
+                        }
+                        iplView.hideProgress();
+                    }
+                    @Override
+                    public void onError(Throwable e) {
+                        iplView.hideProgress();
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        iplView.hideProgress();
+                    }
+                });
+    }
 
 
 
@@ -188,6 +221,7 @@ public class IptPresenter {
         void showCustomer(CustomerModal response);
         void showCustomerInv(CustomerInvModal.Response[] response);
         void showState(StateModal response);
+        void showRequestCode(String code);
         void showToCustomer(ToCustomerModal.Response[] response);
         void iptCreatedSucess();
     }

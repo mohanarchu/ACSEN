@@ -5,6 +5,7 @@ import com.example.ascen.modal.IptListModal;
 import com.example.ascen.modal.IptUpdatePojo;
 import com.example.ascen.modal.ItpSuccessPojo;
 import com.example.ascen.modal.LoginModal;
+import com.example.ascen.modal.ReqNumberPojo;
 import com.example.ascen.modal.StateModal;
 import com.example.ascen.modal.ToCustomerModal;
 import com.example.ascen.presenter.CustomerInvModal;
@@ -83,6 +84,11 @@ public class UserRepository {
     public static Observable<ItpSuccessPojo> createItp(JsonObject jsonObject) {
         return ApiClient.getInstance().getApi(MainInterface.class)
                 .createItp(jsonObject)
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+    public static Observable<ReqNumberPojo> getReqNumber(JsonObject jsonObject) {
+        return ApiClient.getInstance().getApi(MainInterface.class)
+                .getReqNumber(jsonObject)
                 .observeOn(AndroidSchedulers.mainThread());
     }
 }

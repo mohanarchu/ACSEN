@@ -56,6 +56,8 @@ public class CreateIptActivity extends AppCompatActivity implements IptPresenter
     List<CustomerInvModal.Response> invoiceResponse;
     CustomerModal.Response selectedCustomer;
     ToCustomerModal.Response selectedToCustomer;
+
+    String reqNumber   = "0";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -124,52 +126,10 @@ public class CreateIptActivity extends AppCompatActivity implements IptPresenter
                     showError("Choose all the details");
                     return;
                 }
+                JsonObject jsonObject = new JsonObject();
+                jsonObject.addProperty("EmpCode",SessionLogin.getUser().getResult()[0].getEmpCode());
+                iptPresenter.getRequestNumber(jsonObject);
 
-                JsonObject masterObject = new JsonObject();
-                JsonArray jsonElements = new JsonArray();
-                for (int i=0;i<invoiceResponse.size();i++){
-                    Random rand = new Random();
-                    int n = rand.nextInt(100000);
-                    JsonObject jsonObject = new JsonObject();
-                    jsonObject.addProperty("REQUESTNUM","HV0060-"+n);
-                    jsonObject.addProperty("REQDATE", DateUtils.getCurrentDate());
-                    jsonObject.addProperty("SALESID",invoiceResponse.get(i).getSALESID());
-                    jsonObject.addProperty("FROMCUSTACCOUNT",selectedCustomer.getAccountNum());
-                    jsonObject.addProperty("TOCUSTACCOUNT",selectedToCustomer.getACCOUNTNUM());
-                    jsonObject.addProperty("FROMNAME",selectedCustomer.getName());
-                    jsonObject.addProperty("TONAME",selectedToCustomer.getNAME());
-                    jsonObject.addProperty("LINENUM",invoiceResponse.get(i).getLINENUM());
-                    jsonObject.addProperty("ITEMID",invoiceResponse.get(i).getITEMID());
-                    jsonObject.addProperty("ITEMNAME",invoiceResponse.get(i).getITEMNAME());
-                    jsonObject.addProperty("INVOICEDQTY",invoiceResponse.get(i).getSALESQTY());
-                    jsonObject.addProperty("TRANSFERQTY",invoiceResponse.get(i).getTRANSFERQTY() == null || invoiceResponse.get(i).getTRANSFERQTY().isEmpty() ? "0" :  invoiceResponse.get(i).getTRANSFERQTY());
-                    jsonObject.addProperty("FROMTMID",selectedCustomer.getTmId());
-                    jsonObject.addProperty("FROMTMNAME",selectedCustomer.getTmId());
-                    jsonObject.addProperty("FROMRBMID",selectedCustomer.getRBMId());
-                    jsonObject.addProperty("FROMRBMNAME",selectedCustomer.getRBMNAME());
-                    jsonObject.addProperty("FROMDBMSTATUS","pending");
-                    jsonObject.addProperty("FROMDBMID",selectedCustomer.getDBMId());
-                    jsonObject.addProperty("FROMDBMNAME",selectedCustomer.getDBMNAME());
-                    jsonObject.addProperty("FROMDBMSTATUS","pending");
-                    jsonObject.addProperty("TOTMID",selectedToCustomer.getDBMId());
-                    jsonObject.addProperty("TOTMNAME",selectedToCustomer.getDBMNAME());
-                    jsonObject.addProperty("TORBMID",selectedToCustomer.getRBMID());
-                    jsonObject.addProperty("TORBMNAME",selectedToCustomer.getRBMNAME());
-                    jsonObject.addProperty("TORBMSTATUS","pending");
-                    jsonObject.addProperty("TODBMID",selectedToCustomer.getDBMId());
-                    jsonObject.addProperty("TODBMNAME", selectedToCustomer.getDBMNAME());
-                    jsonObject.addProperty("TODBMSTATUS","pending");
-                    jsonObject.addProperty("IPTSTATUS","pending");
-                    jsonObject.addProperty("DATAAREAID","hof");
-                    jsonObject.addProperty("RECVERSION","1");
-                    Random rands = new Random();
-                    int ns = rands.nextInt(1000000);
-                    jsonObject.addProperty( "RECID", ns+"");
-                    jsonElements.add(jsonObject);
-                }
-                masterObject.add("data",jsonElements);
-                masterObject.addProperty("multipleInsert",true);
-                iptPresenter.createItp(masterObject);
             }
         });
     }
@@ -248,15 +208,11 @@ public class CreateIptActivity extends AppCompatActivity implements IptPresenter
                         getNAME() + "\n" +responseData.get(i).getCUSTGROUP(),
                         responseData.get(i).getCUSTGROUP(), ""));
             }
-            DropDownSelector dropDownSelector = new DropDownSelector(CreateIptActivity.this, binding.customerName,
-                    searchArrays, new CommonSelectorListener() {
-                @Override
-                public void selectedId(int position, String name, String selectedId, String alternateId) {
-                    stateGroupId = selectedId;
-                    binding.state.setText(name.split("\n")[0]);
-                    binding.toCustomer.setText("");
-                    selectedToCustomer = null;
-                }
+            DropDownSelector dropDownSelector = new DropDownSelector(CreateIptActivity.this, binding.customerName, searchArrays, (position, name, selectedId, alternateId) -> {
+                stateGroupId = selectedId;
+                binding.state.setText(name.split("\n")[0]);
+                binding.toCustomer.setText("");
+                selectedToCustomer = null;
             }, 9);
             dropDownSelector.show( binding.state);
         } else {
@@ -390,6 +346,58 @@ public class CreateIptActivity extends AppCompatActivity implements IptPresenter
     }
 
     @Override
+    public void showRequestCode(String code) {
+        reqNumber = code;
+
+        JsonObject masterObject = new JsonObject();
+        JsonArray jsonElements = new JsonArray();
+        for (int i=0;i<invoiceResponse.size();i++){
+            Random rand = new Random();
+            int n = rand.nextInt(100000);
+            JsonObject jsonObject = new JsonObject();
+            @SuppressLint("DefaultLocale") String formatted = String.format("%05d", Integer.parseInt(reqNumber) + 1);
+            jsonObject.addProperty("REQUESTNUM",SessionLogin.getUser().getResult()[0].getEmpCode()+"-"+formatted);
+            jsonObject.addProperty("REQDATE", DateUtils.getCurrentDate());
+            jsonObject.addProperty("SALESID",invoiceResponse.get(i).getSALESID());
+            jsonObject.addProperty("FROMCUSTACCOUNT",selectedCustomer.getAccountNum());
+            jsonObject.addProperty("TOCUSTACCOUNT",selectedToCustomer.getACCOUNTNUM());
+            jsonObject.addProperty("FROMNAME",selectedCustomer.getName());
+            jsonObject.addProperty("TONAME",selectedToCustomer.getNAME());
+            jsonObject.addProperty("LINENUM",invoiceResponse.get(i).getLINENUM());
+            jsonObject.addProperty("ITEMID",invoiceResponse.get(i).getITEMID());
+            jsonObject.addProperty("ITEMNAME",invoiceResponse.get(i).getITEMNAME());
+            jsonObject.addProperty("INVOICEDQTY",invoiceResponse.get(i).getSALESQTY());
+            jsonObject.addProperty("TRANSFERQTY",invoiceResponse.get(i).getTRANSFERQTY() == null || invoiceResponse.get(i).getTRANSFERQTY().isEmpty() ? "0" :  invoiceResponse.get(i).getTRANSFERQTY());
+            jsonObject.addProperty("FROMTMID",selectedCustomer.getTmId());
+            jsonObject.addProperty("FROMTMNAME",selectedCustomer.getTmId());
+            jsonObject.addProperty("FROMRBMID",selectedCustomer.getRBMId());
+            jsonObject.addProperty("FROMRBMNAME",selectedCustomer.getRBMNAME());
+            jsonObject.addProperty("FROMDBMSTATUS","pending");
+            jsonObject.addProperty("FROMDBMID",selectedCustomer.getDBMId());
+            jsonObject.addProperty("FROMDBMNAME",selectedCustomer.getDBMNAME());
+            jsonObject.addProperty("FROMDBMSTATUS","pending");
+            jsonObject.addProperty("TOTMID",selectedToCustomer.getDBMId());
+            jsonObject.addProperty("TOTMNAME",selectedToCustomer.getDBMNAME());
+            jsonObject.addProperty("TORBMID",selectedToCustomer.getRBMID());
+            jsonObject.addProperty("TORBMNAME",selectedToCustomer.getRBMNAME());
+            jsonObject.addProperty("TORBMSTATUS","pending");
+            jsonObject.addProperty("TODBMID",selectedToCustomer.getDBMId());
+            jsonObject.addProperty("TODBMNAME", selectedToCustomer.getDBMNAME());
+            jsonObject.addProperty("TODBMSTATUS","pending");
+            jsonObject.addProperty("IPTSTATUS","pending");
+            jsonObject.addProperty("DATAAREAID","hof");
+            jsonObject.addProperty("RECVERSION","1");
+            Random rands = new Random();
+            int ns = rands.nextInt(1000000);
+            jsonObject.addProperty( "RECID", ns+"");
+            jsonElements.add(jsonObject);
+        }
+        masterObject.add("data",jsonElements);
+        masterObject.addProperty("multipleInsert",true);
+        iptPresenter.createItp(masterObject);
+    }
+
+    @Override
     public void showToCustomer(ToCustomerModal.Response[] response) {
           showToCustomerPojo(response);
 
@@ -402,7 +410,7 @@ public class CreateIptActivity extends AppCompatActivity implements IptPresenter
         finish();
     }
     @SuppressLint("MissingPermission")
-    private boolean isNetworkConnected() {
+    public boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
     }

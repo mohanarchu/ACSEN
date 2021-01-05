@@ -5,6 +5,7 @@ import com.example.ascen.modal.IptListModal;
 import com.example.ascen.modal.IptUpdatePojo;
 import com.example.ascen.modal.ItpSuccessPojo;
 import com.example.ascen.modal.LoginModal;
+import com.example.ascen.modal.ReqNumberPojo;
 import com.example.ascen.modal.StateModal;
 import com.example.ascen.modal.ToCustomerModal;
 import com.example.ascen.presenter.CustomerInvModal;
@@ -43,6 +44,9 @@ public interface MainInterface {
 
     @POST("API/CreateIPT")
     Observable<ItpSuccessPojo> createItp(@Body JsonObject jsonObject);
+
+    @POST("API/REQNUM")
+    Observable<ReqNumberPojo> getReqNumber(@Body JsonObject jsonObject);
 
     @POST("API/IPTUpdate")
     Observable<IptUpdatePojo> updateItp(@Body JsonObject jsonObject);

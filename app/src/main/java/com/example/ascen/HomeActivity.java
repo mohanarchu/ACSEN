@@ -7,13 +7,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
@@ -50,7 +54,7 @@ import butterknife.OnClick;
 public class HomeActivity extends AppCompatActivity implements IptListPresenter.IptListView, LoginPresenter.LoginView {
 
 
-
+    boolean doubleBackToExitPressedOnce = false;
     ActivityHomeBinding binding;
     IptListPresenter iptListPresenter;
     AddressAdapter iptAdapter = new AddressAdapter();
@@ -69,7 +73,13 @@ public class HomeActivity extends AppCompatActivity implements IptListPresenter.
        });
         iptListPresenter = new IptListPresenter(this);
         loginPresenter = new LoginPresenter(this,getApplicationContext());
-        iptListPresenter.getList();
+
+        if (!isNetworkConnected()) {
+            showError("Check your internet connection ");
+        } else {
+            iptListPresenter.getList();
+        }
+
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL,false);
         binding.iptRecycler.setLayoutManager(linearLayoutManager);
         binding.iptRecycler.setAdapter(iptAdapter);
@@ -262,7 +272,8 @@ public class HomeActivity extends AppCompatActivity implements IptListPresenter.
     @Override
     public void showList(IptListModal.Response[] responses) {
         arrays = new ArrayList<>(Arrays.asList(responses));
-       setData(arrays);
+//          setData(arrays);
+        filter("Waiting for approval","Pending");
     }
 
     @Override
@@ -272,6 +283,22 @@ public class HomeActivity extends AppCompatActivity implements IptListPresenter.
 
     @Override
     public void onBackPressed() {
-
+        if (doubleBackToExitPressedOnce) {
+            finish();
+            return;
+        }
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Please click back again to exit", Toast.LENGTH_SHORT).show();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce=false;
+            }
+        }, 2000);
+    }
+    @SuppressLint("MissingPermission")
+    public boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
     }
 }
