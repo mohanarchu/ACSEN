@@ -29,35 +29,39 @@ public class LoginPresenter {
         this.context = context;
     }
 
-    public void doLogin(String emiId,String token) {
+    public void doLogin(String emiId,String token,String password) {
         userView.showProgress();
         UserRepository.doLogin(emiId).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<LoginModal>() {
             @Override
             public void onSubscribe(Disposable d) {
 
+
             }
             @Override
             public void onNext(LoginModal responseBody) {
                 String deviceId = Settings.Secure.getString(context.getContentResolver(),Settings.Secure.ANDROID_ID);
                 if (responseBody.getResult().length != 0 ){
-                    if (responseBody.getResult()[0].getDeviceId().isEmpty() || responseBody.getResult()[0].getDeviceId() == null) {
-                        JsonObject jsonObject = new JsonObject();
-                        jsonObject.addProperty("EmpCode",responseBody.getResult()[0].getEmpCode());
-                        jsonObject.addProperty("Acting",responseBody.getResult()[0].getActing());
-                        jsonObject.addProperty("Dcode",responseBody.getResult()[0].getDcode());
-                        jsonObject.addProperty("DeviceId",deviceId);
-                        jsonObject.addProperty("Token",token);
-                        jsonObject.addProperty("dataAreaId","hof");
-                        updateDeviceId(jsonObject,responseBody.getResult()[0].getEmpCode(),token);
-                    } else {
-                        if (deviceId.equals(responseBody.getResult()[0].getDeviceId())) {
-                            userView.showResult(responseBody);
-                        }   else {
-                            userView.showMistmatchError(responseBody,deviceId);
+                    if (responseBody.getResult()[0].getPassword().toLowerCase().equals(password.toLowerCase())) {
+                        if (responseBody.getResult()[0].getDeviceId().isEmpty() || responseBody.getResult()[0].getDeviceId() == null) {
+                            JsonObject jsonObject = new JsonObject();
+                            jsonObject.addProperty("EmpCode",responseBody.getResult()[0].getEmpCode());
+                            jsonObject.addProperty("Acting",responseBody.getResult()[0].getActing());
+                            jsonObject.addProperty("Dcode",responseBody.getResult()[0].getDcode());
+                            jsonObject.addProperty("DeviceId",deviceId);
+                            jsonObject.addProperty("Token",token);
+                            jsonObject.addProperty("dataAreaId","hof");
+                            updateDeviceId(jsonObject,responseBody.getResult()[0].getEmpCode(),token,password);
+                        } else {
+                            if (deviceId.equals(responseBody.getResult()[0].getDeviceId())) {
+                                userView.showResult(responseBody);
+                            } else {
+                                userView.showMistmatchError(responseBody,deviceId);
+                            }
                         }
+                    } else{
+                        userView.showError("Entered invalid password...Try again");
                     }
-
                 } else {
                     userView.showError("Login failed... invalid user id");
                 }
@@ -74,7 +78,7 @@ public class LoginPresenter {
             }
         });
     }
-    public void updateDeviceId(JsonObject jsonObject,String empId,String token) {
+    public void updateDeviceId(JsonObject jsonObject,String empId,String token,String password) {
         userView.showProgress();
         UserRepository.updateDeviceId(jsonObject).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<Response<ResponseBody>>() {
@@ -85,7 +89,7 @@ public class LoginPresenter {
                     @Override
                     public void onNext(Response<ResponseBody> responseBody) {
                         if (responseBody.code() == 200){
-                            doLogin(empId,token);
+                            doLogin(empId,token,password);
                             userView.hideProgress();
                         }
                     }

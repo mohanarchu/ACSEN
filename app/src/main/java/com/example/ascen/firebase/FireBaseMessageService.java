@@ -49,7 +49,7 @@ public class FireBaseMessageService extends FirebaseMessagingService implements 
             jsonObject.addProperty("DeviceId",deviceId);
             jsonObject.addProperty("Token",s);
             jsonObject.addProperty("dataAreaId","hof");
-            loginPresenter.updateDeviceId(jsonObject,SessionLogin.getUser().getResult()[0].getEmpCode(),s);
+            loginPresenter.updateDeviceId(jsonObject,SessionLogin.getUser().getResult()[0].getEmpCode(),s,SessionLogin.getUser().getResult()[0].getPassword());
         }
         super.onNewToken(s);
     }

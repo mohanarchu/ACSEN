@@ -82,6 +82,12 @@ public class CreateIptActivity extends AppCompatActivity implements IptPresenter
         binding.customerInvoice.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                if (!isNetworkConnected()) {
+                    showError("Check internet connection");
+                    return;
+                }
+
                 if (customerAccountNumber.isEmpty()){
                     showError("Choose customer");
                     return;
@@ -107,6 +113,11 @@ public class CreateIptActivity extends AppCompatActivity implements IptPresenter
         binding.toCustomer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (!isNetworkConnected()) {
+                    showError("Check internet connection");
+                    return;
+                }
+
                 if (stateGroupId.isEmpty()){
                     showError("Select state");
                     return;
@@ -121,6 +132,11 @@ public class CreateIptActivity extends AppCompatActivity implements IptPresenter
             @Override
             public void onClick(View v) {
 
+
+                if (!isNetworkConnected()) {
+                    showError("Check internet connection");
+                    return;
+                }
 
                 if (binding.customerName.getText().toString().isEmpty() || binding.customerInvoice.getText().toString().isEmpty() || binding.state.getText().toString().isEmpty() || binding.toCustomer.getText().toString().isEmpty()) {
                     showError("Choose all the details");
@@ -348,42 +364,44 @@ public class CreateIptActivity extends AppCompatActivity implements IptPresenter
     @Override
     public void showRequestCode(String code) {
         reqNumber = code;
-
+        String formatted = "";
         JsonObject masterObject = new JsonObject();
         JsonArray jsonElements = new JsonArray();
-        for (int i=0;i<invoiceResponse.size();i++){
+        for (int i=0;i<invoiceResponse.size();i++) {
             Random rand = new Random();
             int n = rand.nextInt(100000);
             JsonObject jsonObject = new JsonObject();
-            @SuppressLint("DefaultLocale") String formatted = String.format("%05d", Integer.parseInt(reqNumber) + 1);
+            formatted = String.format("%05d", Integer.parseInt(reqNumber) + i + 1);
             jsonObject.addProperty("REQUESTNUM",SessionLogin.getUser().getResult()[0].getEmpCode()+"-"+formatted);
             jsonObject.addProperty("REQDATE", DateUtils.getCurrentDate());
             jsonObject.addProperty("SALESID",invoiceResponse.get(i).getSALESID());
             jsonObject.addProperty("FROMCUSTACCOUNT",selectedCustomer.getAccountNum());
             jsonObject.addProperty("TOCUSTACCOUNT",selectedToCustomer.getACCOUNTNUM());
             jsonObject.addProperty("FROMNAME",selectedCustomer.getName());
+            jsonObject.addProperty("INVOICEID",invoiceResponse.get(i).getINVOICEID());
             jsonObject.addProperty("TONAME",selectedToCustomer.getNAME());
             jsonObject.addProperty("LINENUM",invoiceResponse.get(i).getLINENUM());
             jsonObject.addProperty("ITEMID",invoiceResponse.get(i).getITEMID());
             jsonObject.addProperty("ITEMNAME",invoiceResponse.get(i).getITEMNAME());
             jsonObject.addProperty("INVOICEDQTY",invoiceResponse.get(i).getSALESQTY());
-            jsonObject.addProperty("TRANSFERQTY",invoiceResponse.get(i).getTRANSFERQTY() == null || invoiceResponse.get(i).getTRANSFERQTY().isEmpty() ? "0" :  invoiceResponse.get(i).getTRANSFERQTY());
+            jsonObject.addProperty("TRANSFERQTY",invoiceResponse.get(i).getTRANSFERQTY() == null ||
+                    invoiceResponse.get(i).getTRANSFERQTY().isEmpty() ? "0" :  invoiceResponse.get(i).getTRANSFERQTY());
             jsonObject.addProperty("FROMTMID",selectedCustomer.getTmId());
-            jsonObject.addProperty("FROMTMNAME",selectedCustomer.getTmId());
+            jsonObject.addProperty("FROMTMNAME",SessionLogin.getUser().getResult()[0].getEmpName());
             jsonObject.addProperty("FROMRBMID",selectedCustomer.getRBMId());
             jsonObject.addProperty("FROMRBMNAME",selectedCustomer.getRBMNAME());
-            jsonObject.addProperty("FROMDBMSTATUS","pending");
             jsonObject.addProperty("FROMDBMID",selectedCustomer.getDBMId());
             jsonObject.addProperty("FROMDBMNAME",selectedCustomer.getDBMNAME());
-            jsonObject.addProperty("FROMDBMSTATUS","pending");
             jsonObject.addProperty("TOTMID",selectedToCustomer.getDBMId());
             jsonObject.addProperty("TOTMNAME",selectedToCustomer.getDBMNAME());
             jsonObject.addProperty("TORBMID",selectedToCustomer.getRBMID());
             jsonObject.addProperty("TORBMNAME",selectedToCustomer.getRBMNAME());
-            jsonObject.addProperty("TORBMSTATUS","pending");
             jsonObject.addProperty("TODBMID",selectedToCustomer.getDBMId());
             jsonObject.addProperty("TODBMNAME", selectedToCustomer.getDBMNAME());
             jsonObject.addProperty("TODBMSTATUS","pending");
+            jsonObject.addProperty("FROMDBMSTATUS","pending");
+            jsonObject.addProperty("TORBMSTATUS","pending");
+            jsonObject.addProperty("FROMRBMSTATUS","pending");
             jsonObject.addProperty("IPTSTATUS","pending");
             jsonObject.addProperty("DATAAREAID","hof");
             jsonObject.addProperty("RECVERSION","1");
@@ -394,17 +412,17 @@ public class CreateIptActivity extends AppCompatActivity implements IptPresenter
         }
         masterObject.add("data",jsonElements);
         masterObject.addProperty("multipleInsert",true);
-        iptPresenter.createItp(masterObject);
+        iptPresenter.createItp(masterObject,formatted);
     }
 
     @Override
     public void showToCustomer(ToCustomerModal.Response[] response) {
           showToCustomerPojo(response);
-
     }
 
     @Override
     public void iptCreatedSucess() {
+        showError("Ipt created successfully");
         Intent returnIntent = new Intent();
         setResult(Activity.RESULT_OK,returnIntent);
         finish();

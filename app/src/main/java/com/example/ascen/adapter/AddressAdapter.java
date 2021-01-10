@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ascen.databinding.IptDesignBinding;
 import com.example.ascen.modal.IptListModal;
+import com.example.ascen.session.SessionLogin;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -50,18 +51,59 @@ public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.IptHolde
         holder.itemCompanyBinding.itemName.setText(response.getITEMNAME());
         holder.itemCompanyBinding.iptStatus.setText(response.getIPTSTATUS());
 
-        if (response.getIPTSTATUS().equals("pending")) {
+
+
+        holder.itemCompanyBinding.approveStatus.setVisibility(View.GONE);
+
+
+
+        if (response.getFROMRBMID().equals(response.getTORBMID()) && response.getFROMDBMID().equals(response.getTODBMID())
+                && response.getFROMRBMID().equals(SessionLogin.getUser().getResult()[0].getEmpCode()) ) {
             holder.itemCompanyBinding.approveStatus.setVisibility(View.VISIBLE);
-        } else {
+        }
+
+        if (!response.getFROMRBMID().equals(response.getTORBMID()) && response.getFROMDBMID().equals(response.getTODBMID()) && response.getFROMRBMSTATUS().toLowerCase().equals("pending") &&
+                response.getFROMDBMSTATUS().toLowerCase().equals("pending") ) {
+            if (response.getFROMRBMID().equals(SessionLogin.getUser().getResult()[0].getEmpCode())) {
+                holder.itemCompanyBinding.approveStatus.setVisibility(View.VISIBLE);
+            }
+        }
+
+        if (!response.getFROMRBMID().equals(response.getTORBMID()) && response.getFROMDBMID().equals(response.getTODBMID())
+                && response.getFROMRBMSTATUS().toLowerCase().equals("approved") &&
+                response.getFROMDBMSTATUS().toLowerCase().equals("pending") ){
+            if (response.getTORBMID().equals(SessionLogin.getUser().getResult()[0].getEmpCode())) {
+                holder.itemCompanyBinding.approveStatus.setVisibility(View.VISIBLE);
+            }
+        }
+
+
+        if (!response.getFROMRBMID().equals(response.getTORBMID()) && !response.getFROMDBMID().equals(response.getTODBMID())
+                && response.getFROMRBMID().equals(SessionLogin.getUser().getResult()[0].getEmpCode()) && response.getFROMRBMSTATUS().toLowerCase().equals("pending") &&
+                response.getFROMDBMSTATUS().toLowerCase().equals("pending") ) {
+               holder.itemCompanyBinding.approveStatus.setVisibility(View.VISIBLE);
+        }
+
+
+        if (!response.getFROMRBMID().equals(response.getTORBMID()) && !response.getFROMDBMID().equals(response.getTODBMID())
+                && response.getFROMRBMSTATUS().toLowerCase().equals("approved") &&
+                response.getFROMDBMSTATUS().toLowerCase().equals("pending") ) {
+            if ( response.getFROMDBMID().equals(SessionLogin.getUser().getResult()[0].getEmpCode()) ) {
+                holder.itemCompanyBinding.approveStatus.setVisibility(View.VISIBLE);
+            }
+        }
+        if (!response.getFROMRBMID().equals(response.getTORBMID()) && !response.getFROMDBMID().equals(response.getTODBMID()) && response.getFROMRBMSTATUS().toLowerCase().equals("approved") &&
+                response.getFROMDBMSTATUS().toLowerCase().equals("approved") ) {
+            if (response.getTODBMID().equals(SessionLogin.getUser().getResult()[0].getEmpCode())) {
+                holder.itemCompanyBinding.approveStatus.setVisibility(View.VISIBLE);
+            }
+        }
+
+        if(SessionLogin.getUser().getResult()[0].getEmpCode().equals("TM") || !response.getIPTSTATUS().equals("pending") ) {
             holder.itemCompanyBinding.approveStatus.setVisibility(View.GONE);
         }
 
-        holder.itemCompanyBinding.approveStatus.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                itemChangeListerner.onStatusChanged(response,true);
-            }
-        });
+        holder.itemCompanyBinding.approveStatus.setOnClickListener(v -> itemChangeListerner.onStatusChanged(response,true));
 
     }
 

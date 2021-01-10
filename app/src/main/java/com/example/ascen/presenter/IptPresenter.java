@@ -14,6 +14,7 @@ import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.ResponseBody;
 
 public class IptPresenter {
 
@@ -28,7 +29,9 @@ public class IptPresenter {
 
     public void getCustomer() {
         iplView.showProgress();
-        UserRepository.getCustomer(SessionLogin.getUser().getResult()[0].getSite()).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+        UserRepository.getCustomer( SessionLogin.getUser().getResult()[0].getActing().toLowerCase().equals("single")  ||
+                SessionLogin.getUser().getResult()[0].getDcode().toLowerCase().equals("tm") ?
+                SessionLogin.getUser().getResult()[0].getEmpCode() :  SessionLogin.getUser().getResult()[0].getTerritoryName() ) .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<CustomerModal>() {
                     @Override
                     public void onSubscribe(Disposable d) {
@@ -59,7 +62,7 @@ public class IptPresenter {
 
     public void getCustomerInv(String accountNum) {
         iplView.showProgress();
-        UserRepository.getCustomerInv(SessionLogin.getUser().getResult()[0].getSite(),accountNum).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+        UserRepository.getCustomerInv(SessionLogin.getUser().getResult()[0].getEmpCode(),accountNum).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<CustomerInvModal>() {
                     @Override
                     public void onSubscribe(Disposable d) {
@@ -150,7 +153,7 @@ public class IptPresenter {
                     }
                 });
     }
-    public void createItp(JsonObject jsonObject) {
+    public void createItp(JsonObject jsonObject,String requestNumer) {
         iplView.showProgress();
         UserRepository.createItp(jsonObject).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<ItpSuccessPojo>() {
@@ -163,6 +166,7 @@ public class IptPresenter {
 
                         if (responseBody.getStatus().equals("true") ){
                             iplView.iptCreatedSucess();
+                            addRequestNumber(requestNumer);
                         } else {
                             iplView.showError("Error in  creating IPT");
                         }
@@ -179,6 +183,33 @@ public class IptPresenter {
                     }
                 });
     }
+
+
+    public void addRequestNumber(String requestNumver) {
+
+        UserRepository.addRequestNumber(requestNumver).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<ResponseBody>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+                    @Override
+                    public void onNext(ResponseBody responseBody) {
+
+
+                    }
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
     public void getRequestNumber(JsonObject jsonObject) {
         iplView.showProgress();
         UserRepository.getReqNumber(jsonObject).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
@@ -191,10 +222,11 @@ public class IptPresenter {
                     public void onNext(ReqNumberPojo responseBody) {
 
                         if (responseBody.getStatus().equals("true") ){
-                            if (responseBody.getResponse() != null)
-                            iplView.showRequestCode(responseBody.getResponse()[0].getNUMBERSEQUENCE());
-                            else
+                            if (responseBody.getResponse().length > 0) {
+                                iplView.showRequestCode(responseBody.getResponse()[0].getNUMBERSEQUENCE());
+                            } else {
                                 iplView.showRequestCode("0");
+                            }
                         } else {
                             iplView.showError("Error in  creating IPT");
                         }

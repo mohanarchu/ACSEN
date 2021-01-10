@@ -67,19 +67,18 @@ public class HomeActivity extends AppCompatActivity implements IptListPresenter.
         binding = ActivityHomeBinding.inflate(getLayoutInflater());
         FirebaseApp.initializeApp(this);
         setContentView(binding.getRoot());
+
         binding.btnCreateIpt.setOnClickListener(v -> {
            Intent intent = new Intent(getApplicationContext(),CreateIptActivity.class);
            startActivityForResult(intent,100);
        });
         iptListPresenter = new IptListPresenter(this);
         loginPresenter = new LoginPresenter(this,getApplicationContext());
-
         if (!isNetworkConnected()) {
             showError("Check your internet connection ");
         } else {
             iptListPresenter.getList();
         }
-
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext(), RecyclerView.VERTICAL,false);
         binding.iptRecycler.setLayoutManager(linearLayoutManager);
         binding.iptRecycler.setAdapter(iptAdapter);
@@ -104,11 +103,9 @@ public class HomeActivity extends AppCompatActivity implements IptListPresenter.
                         Log.w("TAG", "Fetching FCM registration token failed", task.getException());
                         return;
                     }
-
                     String token = task.getResult();
                     Log.i("TAG","Toen to Send"+token);
                     // Get new FCM registration token
-
                     String deviceId = Settings.Secure.getString(getApplicationContext().getContentResolver(),Settings.Secure.ANDROID_ID);
                     JsonObject jsonObject = new JsonObject();
                     jsonObject.addProperty("EmpCode", SessionLogin.getUser().getResult()[0].getEmpCode());
@@ -118,8 +115,9 @@ public class HomeActivity extends AppCompatActivity implements IptListPresenter.
                     jsonObject.addProperty("Token",token);
                     jsonObject.addProperty("dataAreaId","hof");
                     SessionLogin.saveFirstTime(false);
-                    loginPresenter.updateDeviceId(jsonObject,SessionLogin.getUser().getResult()[0].getEmpCode(),token);
-                });
+                    loginPresenter.updateDeviceId(jsonObject,SessionLogin.getUser().getResult()[0].getEmpCode(),token,SessionLogin.getUser().getResult()[0].getPassword());
+                }
+                );
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -247,17 +245,86 @@ public class HomeActivity extends AppCompatActivity implements IptListPresenter.
         if (arrays.size() != 0) {
             iptAdapter.setList(arrays, new AddressAdapter.OnItemChangeListener() {
                 @Override
-                public void onStatusChanged(IptListModal.Response  responses,boolean isAdd) {
+                public void onStatusChanged(IptListModal.Response  response,boolean isAdd) {
                     JsonObject jsonObject = new JsonObject();
-                    jsonObject.addProperty("REQUESTNUM",responses.getREQUESTNUM());
-                    jsonObject.addProperty("DCODE",SessionLogin.getUser().getResult()[0].getDcode());
-                    jsonObject.addProperty("EmpCode",SessionLogin.getUser().getResult()[0].getEmpCode());
-                    jsonObject.addProperty("TYPE",SessionLogin.getUser().getResult()[0].getEmpCode().equals(responses.getFROMDBMID()) ? "FROM" :
-                            SessionLogin.getUser().getResult()[0].getEmpCode().equals(responses.getTORBMID()) ?  "TO" : "BOTH" );
-                    jsonObject.addProperty("DBM",responses.getTODBMID().equals(responses.getFROMDBMID()) ? "SAME" : "DIFF");
-                    jsonObject.addProperty("RBM",responses.getFROMRBMID().equals(responses.getTORBMID()) ? "SAME" : "DIFF");
-                    jsonObject.addProperty("STATUS","Approved");
-                    iptListPresenter.updateIpt(jsonObject);
+                    jsonObject.addProperty("REQUESTNUM",response.getREQUESTNUM());
+                    JsonObject fcmJson = new JsonObject();
+                    fcmJson.addProperty("REQUESTNUM",response.getREQUESTNUM());
+                    if (response.getFROMRBMID().equals(response.getTORBMID()) && response.getFROMDBMID().equals(response.getTODBMID())
+                            && response.getFROMRBMID().equals(SessionLogin.getUser().getResult()[0].getEmpCode()) ) {
+                        jsonObject.addProperty("FROMRBMSTATUS","approved");
+                        jsonObject.addProperty("TORBMSTATUS","approved");
+                        jsonObject.addProperty("FROMDBMSTATUS","approved");
+                        jsonObject.addProperty("TODBMSTATUS","approved");
+                        jsonObject.addProperty("IPTSTATUS","approved");
+                        fcmJson.addProperty("NTID",response.getFROMDBMID());
+                        fcmJson.addProperty("TY","DBM");
+                    }
+                    if (!response.getFROMRBMID().equals(response.getTORBMID()) && response.getFROMDBMID().equals(response.getTODBMID()) && response.getFROMRBMSTATUS().toLowerCase().equals("pending") &&
+                            response.getFROMDBMSTATUS().toLowerCase().equals("pending") ) {
+                        if (response.getFROMRBMID().equals(SessionLogin.getUser().getResult()[0].getEmpCode())) {
+                            jsonObject.addProperty("FROMRBMSTATUS","approved");
+                            jsonObject.addProperty("TORBMSTATUS","pending");
+                            jsonObject.addProperty("FROMDBMSTATUS","approved");
+                            jsonObject.addProperty("TODBMSTATUS","pending");
+                            jsonObject.addProperty("IPTSTATUS","pending");
+                            fcmJson.addProperty("NTID","");
+                            fcmJson.addProperty("TY","");
+                        }
+                    }
+
+                    if (!response.getFROMRBMID().equals(response.getTORBMID()) && response.getFROMDBMID().equals(response.getTODBMID())
+                            && response.getFROMRBMSTATUS().toLowerCase().equals("approved") &&
+                            response.getFROMDBMSTATUS().toLowerCase().equals("pending") ){
+                        if (response.getTORBMID().equals(SessionLogin.getUser().getResult()[0].getEmpCode())) {
+                            jsonObject.addProperty("FROMRBMSTATUS","approved");
+                            jsonObject.addProperty("TORBMSTATUS","approved");
+                            jsonObject.addProperty("FROMDBMSTATUS","approved");
+                            jsonObject.addProperty("TODBMSTATUS","approved");
+                            jsonObject.addProperty("IPTSTATUS","approved");
+                            fcmJson.addProperty("NTID",response.getFROMDBMID());
+                            fcmJson.addProperty("TY","DBM");
+                        }
+                    }
+
+                    if (!response.getFROMRBMID().equals(response.getTORBMID()) && !response.getFROMDBMID().equals(response.getTODBMID())
+                            && response.getFROMRBMID().equals(SessionLogin.getUser().getResult()[0].getEmpCode()) && response.getFROMRBMSTATUS().toLowerCase().equals("pending") &&
+                            response.getFROMDBMSTATUS().toLowerCase().equals("pending") ) {
+                        jsonObject.addProperty("FROMRBMSTATUS","approved");
+                        jsonObject.addProperty("TORBMSTATUS","pending");
+                        jsonObject.addProperty("FROMDBMSTATUS","pending");
+                        jsonObject.addProperty("TODBMSTATUS","pending");
+                        jsonObject.addProperty("IPTSTATUS","pending");
+                        fcmJson.addProperty("NTID","");
+                        fcmJson.addProperty("TY","");
+                    }
+
+                    if (!response.getFROMRBMID().equals(response.getTORBMID()) && !response.getFROMDBMID().equals(response.getTODBMID())
+                          && response.getFROMRBMSTATUS().toLowerCase().equals("approved") &&
+                            response.getFROMDBMSTATUS().toLowerCase().equals("pending") ) {
+                        if ( response.getFROMDBMID().equals(SessionLogin.getUser().getResult()[0].getEmpCode()) ) {
+                            jsonObject.addProperty("FROMRBMSTATUS","approved");
+                            jsonObject.addProperty("TORBMSTATUS","pending");
+                            jsonObject.addProperty("FROMDBMSTATUS","approved");
+                            jsonObject.addProperty("TODBMSTATUS","pending");
+                            jsonObject.addProperty("IPTSTATUS","pending");
+                            fcmJson.addProperty("NTID","");
+                            fcmJson.addProperty("TY","");
+                        }
+                    }
+                    if (!response.getFROMRBMID().equals(response.getTORBMID()) && !response.getFROMDBMID().equals(response.getTODBMID()) && response.getFROMRBMSTATUS().toLowerCase().equals("approved") &&
+                            response.getFROMDBMSTATUS().toLowerCase().equals("approved") ) {
+                            if (response.getTODBMID().equals(SessionLogin.getUser().getResult()[0].getEmpCode())) {
+                                jsonObject.addProperty("FROMRBMSTATUS","approved");
+                                jsonObject.addProperty("TORBMSTATUS","approved");
+                                jsonObject.addProperty("FROMDBMSTATUS","approved");
+                                jsonObject.addProperty("TODBMSTATUS","approved");
+                                jsonObject.addProperty("IPTSTATUS","approved");
+                                fcmJson.addProperty("NTID",response.getTORBMID());
+                                fcmJson.addProperty("TY","RBM");
+                            }
+                    }
+                    iptListPresenter.updateIpt(jsonObject,fcmJson);
                 }
             });
             iptAdapter.notifyDataSetChanged();

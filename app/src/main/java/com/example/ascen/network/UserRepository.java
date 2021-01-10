@@ -75,9 +75,24 @@ public class UserRepository {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    public static Observable<ResponseBody> addRequestNumber(String requestNumber ) {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("EMPCODE", SessionLogin.getUser().getResult()[0].getEmpCode());
+        jsonObject.addProperty("REQUESTNUM",requestNumber);
+        return ApiClient.getInstance().getApi(MainInterface.class)
+                .addRequestNumber(jsonObject)
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
     public static Observable<IptUpdatePojo> updateItp(JsonObject jsonObject) {
         return ApiClient.getInstance().getApi(MainInterface.class)
                 .updateItp(jsonObject)
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public static Observable<ResponseBody> sendFcm(JsonObject jsonObject) {
+        return ApiClient.getInstance().getApi(MainInterface.class)
+                .sendFcm(jsonObject)
                 .observeOn(AndroidSchedulers.mainThread());
     }
 

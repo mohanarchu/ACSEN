@@ -14,7 +14,7 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
-        public static String API_URL = "http://117.232.103.178:3000/";
+        public static String API_URL = "http://103.44.97.110:3000/";
         //    public static String API_URL = "http://gstapi.cbotsolution.com/api/";
         private static final ApiClient ourInstance = new ApiClient();
         public static ApiClient getInstance() {

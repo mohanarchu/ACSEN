@@ -58,14 +58,13 @@ public class MainActivity extends AppCompatActivity implements LoginPresenter.Lo
                     showError("Please enter password");
                     return;
                 }
-                loginPresenter.doLogin(binding.userId.getText().toString(),fetchFCMToken());
+                loginPresenter.doLogin(binding.userId.getText().toString().toLowerCase(),fetchFCMToken(), binding.password.getText().toString().toLowerCase().trim());
             }
         });
         if (SessionLogin.getLoginSession()) {
             startActivity(new Intent(getApplicationContext(),HomeActivity.class));
             finish();
         }
-
         binding.showPassword.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 binding.password.setTransformationMethod(null);
@@ -125,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements LoginPresenter.Lo
                 jsonObject.addProperty("DeviceId",deviceId);
                 jsonObject.addProperty("Token",fetchFCMToken());
                 jsonObject.addProperty("dataAreaId","hof");
-                loginPresenter.updateDeviceId(jsonObject,loginModal.getResult()[0].getEmpCode(),fetchFCMToken());
+                loginPresenter.updateDeviceId(jsonObject,loginModal.getResult()[0].getEmpCode().toLowerCase(),fetchFCMToken(),binding.password.getText().toString().toLowerCase().trim());
             }
         });
         builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -140,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements LoginPresenter.Lo
 
     @Override
     public void showResult(LoginModal loginModal) {
-        if (loginModal.getResult()[0].getPassword().equals(binding.password.getText().toString().trim())) {
+        if (loginModal.getResult()[0].getPassword().toLowerCase().equals(binding.password.getText().toString().toLowerCase().trim())) {
             SessionLogin.saveLoginSession();
             SessionLogin.saveUser(loginModal);
             Intent intent = new Intent(this,HomeActivity.class);

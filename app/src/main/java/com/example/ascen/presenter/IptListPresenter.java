@@ -10,6 +10,7 @@ import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.ResponseBody;
 
 public class IptListPresenter {
 
@@ -49,7 +50,7 @@ public class IptListPresenter {
                     }
                 });
     }
-    public void updateIpt(JsonObject jsonObject) {
+    public void updateIpt(JsonObject jsonObject,JsonObject fcmJson) {
 
         UserRepository.updateItp(jsonObject).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<IptUpdatePojo>() {
@@ -61,6 +62,7 @@ public class IptListPresenter {
                     public void onNext(IptUpdatePojo responseBody) {
                         if (responseBody.getStatus().endsWith("true") ){
                             iptListView.updateSuccess();
+                            sendFCM(fcmJson);
                             iptListView.showError(responseBody.getMessage());
                         } else {
                             iptListView.showError("Update failed");
@@ -78,6 +80,33 @@ public class IptListPresenter {
                     }
                 });
     }
+
+
+    public void sendFCM(JsonObject jsonObject) {
+
+        UserRepository.sendFcm(jsonObject).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<ResponseBody>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+                    @Override
+                    public void onNext(ResponseBody responseBody) {
+
+                    }
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+
     public interface IptListView {
         void showProgress();
         void hideProgress();

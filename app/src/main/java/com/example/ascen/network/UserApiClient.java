@@ -15,7 +15,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class UserApiClient {
 
-     public static String API_URL = "http://117.232.103.178:8080/";
+     public static String API_URL = "http://103.44.97.110:8080/";
 //    public static String API_URL = "http://gstapi.cbotsolution.com/api/";
     private static final UserApiClient ourInstance = new UserApiClient();
     public static UserApiClient getInstance() {

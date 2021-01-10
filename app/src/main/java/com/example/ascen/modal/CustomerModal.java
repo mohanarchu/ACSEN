@@ -51,7 +51,7 @@ public class CustomerModal {
 
         private String SeedLicNo;
 
-        private String RBMId;
+        private String RBMID;
 
         private String Blocked;
 
@@ -173,12 +173,12 @@ public class CustomerModal {
 
         public String getRBMId ()
         {
-            return RBMId;
+            return RBMID;
         }
 
         public void setRBMId (String RBMId)
         {
-            this.RBMId = RBMId;
+            this.RBMID = RBMId;
         }
 
         public String getBlocked ()
@@ -214,7 +214,7 @@ public class CustomerModal {
         @Override
         public String toString()
         {
-            return "ClassPojo [CustGroup = "+CustGroup+", Dimension = "+Dimension+", CreditMax = "+CreditMax+", Name = "+Name+", PostingProfile = "+PostingProfile+", TmId = "+TmId+", AccountNum = "+AccountNum+", State = "+State+", SeedLicNo = "+SeedLicNo+", RBMId = "+RBMId+", Blocked = "+Blocked+", GSTNumber_IN = "+GSTNumber_IN+", MandatoryCreditLimit = "+MandatoryCreditLimit+"]";
+            return "ClassPojo [CustGroup = "+CustGroup+", Dimension = "+Dimension+", CreditMax = "+CreditMax+", Name = "+Name+", PostingProfile = "+PostingProfile+", TmId = "+TmId+", AccountNum = "+AccountNum+", State = "+State+", SeedLicNo = "+SeedLicNo+", RBMId = "+RBMID+", Blocked = "+Blocked+", GSTNumber_IN = "+GSTNumber_IN+", MandatoryCreditLimit = "+MandatoryCreditLimit+"]";
         }
     }
 

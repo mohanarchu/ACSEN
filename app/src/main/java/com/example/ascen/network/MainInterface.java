@@ -51,6 +51,13 @@ public interface MainInterface {
     @POST("API/IPTUpdate")
     Observable<IptUpdatePojo> updateItp(@Body JsonObject jsonObject);
 
+    @POST("API/NTSEND")
+    Observable<ResponseBody> sendFcm(@Body JsonObject jsonObject);
+
     @POST("API/IPTList")
     Observable<IptListModal> getIptList(@Body JsonObject jsonObject);
+
+
+    @POST("API/REQNUMADD")
+    Observable<ResponseBody> addRequestNumber(@Body JsonObject jsonObject);
 }
