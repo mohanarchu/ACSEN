@@ -31,7 +31,7 @@ public class IptPresenter {
         iplView.showProgress();
         UserRepository.getCustomer( SessionLogin.getUser().getResult()[0].getActing().toLowerCase().equals("single")  ||
                 SessionLogin.getUser().getResult()[0].getDcode().toLowerCase().equals("tm") ?
-                SessionLogin.getUser().getResult()[0].getEmpCode() :  SessionLogin.getUser().getResult()[0].getTerritoryName() ) .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                SessionLogin.getUser().getResult()[0].getSite() :  SessionLogin.getUser().getResult()[0].getTerritoryName() ) .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<CustomerModal>() {
                     @Override
                     public void onSubscribe(Disposable d) {

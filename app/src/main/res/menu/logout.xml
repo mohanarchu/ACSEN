@@ -4,6 +4,11 @@
 
     <item android:icon="@drawable/ic_baseline_exit_to_app_24"
         app:showAsAction="ifRoom"
+        android:orderInCategory="100"
         android:id="@+id/logout"
+        android:title=""></item>
+    <item android:icon="@drawable/ic_baseline_refresh_24"
+        app:showAsAction="ifRoom"
+        android:id="@+id/referesh"
         android:title=""></item>
 </menu>

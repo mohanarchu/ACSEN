@@ -148,6 +148,8 @@ public class HomeActivity extends AppCompatActivity implements IptListPresenter.
             });
             builder.show();
             return true;
+        } else if (id == R.id.referesh) {
+            iptListPresenter.getList();
         }
         return super.onOptionsItemSelected(item);
     }
