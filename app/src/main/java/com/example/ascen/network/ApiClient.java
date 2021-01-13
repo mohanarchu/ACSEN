@@ -46,9 +46,6 @@ public class ApiClient {
                     .client(okHttpClient)
                     .build();
         }
-
-
-
         private HttpLoggingInterceptor getNetworkLogger() {
             HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
             return loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);

@@ -326,6 +326,11 @@ public class CreateIptActivity extends AppCompatActivity implements IptPresenter
                     invId = selectedId;
                     binding.customerInvoice.setText(name.split("\n")[0]);
                     List<CustomerInvModal.Response> responses = new ArrayList<>();
+                    invocieAdapter.setList(null, new InvocieAdapter.IptEditedListerner() {
+                        @Override
+                        public void onChanged(List<CustomerInvModal.Response> responses) {
+                        }
+                    });
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         responses = new ArrayList<>(Arrays.asList(response)).stream().filter(e-> e.getINVOICEID().equals(name.split("\n")[0])).collect(Collectors.toList());
                     } else {
@@ -385,8 +390,9 @@ public class CreateIptActivity extends AppCompatActivity implements IptPresenter
             jsonObject.addProperty("ITEMNAME",invoiceResponse.get(i).getITEMNAME());
             jsonObject.addProperty("INVOICEDQTY",invoiceResponse.get(i).getSALESQTY());
             jsonObject.addProperty("TRANSFERQTY",invoiceResponse.get(i).getTRANSFERQTY() == null ||
-                    invoiceResponse.get(i).getTRANSFERQTY().isEmpty() ? "0" :  invoiceResponse.get(i).getTRANSFERQTY());
-            jsonObject.addProperty("FROMTMID",selectedCustomer.getTmId());
+                                                               invoiceResponse.get(i).getTRANSFERQTY().isEmpty() ? "0" :
+                                                                     invoiceResponse.get(i).getTRANSFERQTY());
+            jsonObject.addProperty("FROMTMID",SessionLogin.getUser().getResult()[0].getEmpCode());
             jsonObject.addProperty("FROMTMNAME",SessionLogin.getUser().getResult()[0].getEmpName());
             jsonObject.addProperty("FROMRBMID",selectedCustomer.getRBMId());
             jsonObject.addProperty("FROMRBMNAME",selectedCustomer.getRBMNAME());

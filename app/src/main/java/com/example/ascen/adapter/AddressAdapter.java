@@ -71,7 +71,7 @@ public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.IptHolde
 
         if (!response.getFROMRBMID().equals(response.getTORBMID()) && response.getFROMDBMID().equals(response.getTODBMID())
                 && response.getFROMRBMSTATUS().toLowerCase().equals("approved") &&
-                response.getFROMDBMSTATUS().toLowerCase().equals("pending") ){
+                response.getFROMDBMSTATUS().toLowerCase().equals("approved") ){
             if (response.getTORBMID().equals(SessionLogin.getUser().getResult()[0].getEmpCode())) {
                 holder.itemCompanyBinding.approveStatus.setVisibility(View.VISIBLE);
             }
