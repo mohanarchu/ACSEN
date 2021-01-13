@@ -83,7 +83,14 @@ public class UserRepository {
                 .addRequestNumber(jsonObject)
                 .observeOn(AndroidSchedulers.mainThread());
     }
-
+    public static Observable<ResponseBody> sendCreateNotification(String requestNumber ,String rbmId) {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("NTID",rbmId);
+        jsonObject.addProperty("REQUESTNUM",requestNumber);
+        return ApiClient.getInstance().getApi(MainInterface.class)
+                .addRequestNumber(jsonObject)
+                .observeOn(AndroidSchedulers.mainThread());
+    }
     public static Observable<IptUpdatePojo> updateItp(JsonObject jsonObject) {
         return ApiClient.getInstance().getApi(MainInterface.class)
                 .updateItp(jsonObject)

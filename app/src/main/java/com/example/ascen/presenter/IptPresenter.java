@@ -153,7 +153,7 @@ public class IptPresenter {
                     }
                 });
     }
-    public void createItp(JsonObject jsonObject,String requestNumer) {
+    public void createItp(JsonObject jsonObject,String requestNumer,String rbmId) {
         iplView.showProgress();
         UserRepository.createItp(jsonObject).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<ItpSuccessPojo>() {
@@ -167,6 +167,7 @@ public class IptPresenter {
                         if (responseBody.getStatus().equals("true") ){
                             iplView.iptCreatedSucess();
                             addRequestNumber(requestNumer);
+                            sendNtSend(requestNumer,rbmId);
                         } else {
                             iplView.showError("Error in  creating IPT");
                         }
@@ -186,8 +187,32 @@ public class IptPresenter {
 
 
     public void addRequestNumber(String requestNumver) {
-
         UserRepository.addRequestNumber(requestNumver).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<ResponseBody>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+                    @Override
+                    public void onNext(ResponseBody responseBody) {
+
+
+                    }
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    public void sendNtSend(String requestNumver,String rbmId) {
+
+        UserRepository.sendCreateNotification(requestNumver,rbmId).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<ResponseBody>() {
                     @Override
                     public void onSubscribe(Disposable d) {

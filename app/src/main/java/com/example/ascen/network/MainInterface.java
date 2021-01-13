@@ -60,4 +60,7 @@ public interface MainInterface {
 
     @POST("API/REQNUMADD")
     Observable<ResponseBody> addRequestNumber(@Body JsonObject jsonObject);
+
+    @POST("API/NTSENDCREATE")
+    Observable<ResponseBody> sendCreateNotification(@Body JsonObject jsonObject);
 }

@@ -418,7 +418,7 @@ public class CreateIptActivity extends AppCompatActivity implements IptPresenter
         }
         masterObject.add("data",jsonElements);
         masterObject.addProperty("multipleInsert",true);
-        iptPresenter.createItp(masterObject,formatted);
+        iptPresenter.createItp(masterObject,formatted,selectedCustomer.getRBMId());
     }
 
     @Override
